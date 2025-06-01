@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusComic - Futuristic Comic Collection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyberblue: '#00f0ff',
+                        cyberpurple: '#bd00ff',
+                        darkbg: '#0a0a1a',
+                        cardbg: 'rgba(20, 20, 40, 0.7)',
+                        glass: 'rgba(255, 255, 255, 0.05)'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 5s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'text-glow': 'text-glow 1.5s ease-in-out infinite alternate'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        glow: {
+                            '0%': { 'box-shadow': '0 0 5px #00f0ff' },
+                            '100%': { 'box-shadow': '0 0 20px #00f0ff, 0 0 30px #bd00ff' }
+                        },
+                        'text-glow': {
+                            '0%': { 'text-shadow': '0 0 5px #00f0ff' },
+                            '100%': { 'text-shadow': '0 0 15px #00f0ff, 0 0 20px #bd00ff' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap');
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a0a1a;
+            color: white;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(189, 0, 255, 0.05) 0%, transparent 20%);
+        }
+        
+        .cyber-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .glass-effect {
+            background: rgba(20, 20, 40, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 240, 255, 0.3), 0 0 30px rgba(189, 0, 255, 0.2);
+            border-color: rgba(0, 240, 255, 0.5);
+        }
+        
+        .input-glow:focus {
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            border-color: rgba(0, 240, 255, 0.5);
+        }
+        
+        .rating-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #bd00ff, #00f0ff);
+        }
+        
+        .upload-area {
+            border: 2px dashed rgba(0, 240, 255, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(0, 240, 255, 0.7);
+            background: rgba(0, 240, 255, 0.05);
+        }
+        
+        .holographic-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.5), transparent);
+        }
+        
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0, 240, 255, 0.05) 50%,
+                transparent 100%
+            );
+            background-size: 100% 8px;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+        
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3), 0 0 50px rgba(189, 0, 255, 0.2);
+        }
+        
+        .loading-spinner {
+            border-top-color: #00f0ff;
+            border-left-color: #bd00ff;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .type-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .manga { background-color: #00f0ff; }
+        .manhwa { background-color: #bd00ff; }
+        .manhua { background-color: #ff00f0; }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .comic-card {
+                width: calc(50% - 1rem);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .comic-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Scanline Effect -->
+    <div class="scanline fixed z-50 opacity-10"></div>
+    
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 relative">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-12">
+            <div class="flex items-center mb-6 md:mb-0">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyberblue to-cyberpurple flex items-center justify-center mr-4">
+                    <i class="fas fa-book-open text-xl text-white"></i>
+                </div>
+                <h1 class="cyber-font text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyberblue to-cyberpurple">
+                    NexusComic
+                </h1>
+            </div>
+            
+            <!-- Search and Add Comic -->
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 w-full md:w-auto">
+                <div class="relative flex-grow md:w-64">
+                    <input type="text" id="searchInput" placeholder="Search comics..." 
+                        class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                    <i class="fas fa-search absolute right-3 top-3 text-cyberblue"></i>
+                </div>
+                <button id="addComicBtn" class="bg-gradient-to-r from-cyberblue to-cyberpurple text-white py-2 px-6 rounded-lg hover:opacity-90 transition flex items-center justify-center">
+                    <i class="fas fa-plus mr-2"></i> Add Comic
+                </button>
+            </div>
+        </header>
+        
+        <!-- Filter Controls -->
+        <div class="glass-effect rounded-lg p-4 mb-8">
+            <div class="flex flex-wrap items-center justify-between">
+                <div class="flex space-x-4 mb-4 md:mb-0">
+                    <button class="filter-btn active px-4 py-2 rounded-lg bg-cyberblue text-darkbg" data-filter="all">All</button>
+                    <button class="filter-btn px-4 py-2 rounded-lg hover:bg-cyberblue hover:text-darkbg transition" data-filter="manga">
+                        <span class="type-indicator manga"></span> Manga
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg hover:bg-cyberpurple hover:text-darkbg transition" data-filter="manhwa">
+                        <span class="type-indicator manhwa"></span> Manhwa
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg hover:bg-pink-500 hover:text-darkbg transition" data-filter="manhua">
+                        <span class="type-indicator manhua"></span> Manhua
+                    </button>
+                </div>
+                <div class="flex items-center">
+                    <span class="mr-2 text-sm">Sort by:</span>
+                    <select id="sortSelect" class="bg-darkbg border border-cyberblue rounded-lg py-2 px-3 text-white focus:outline-none input-glow">
+                        <option value="date-desc">Latest Read</option>
+                        <option value="date-asc">Oldest Read</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="rating-desc">Highest Rating</option>
+                        <option value="rating-asc">Lowest Rating</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comics Grid -->
+        <div id="comicsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Comics will be loaded here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <i class="fas fa-book-open text-6xl text-cyberblue mb-4"></i>
+            <h3 class="text-2xl font-bold mb-2">No Comics Found</h3>
+            <p class="text-gray-400 mb-6">Add your first comic to start your collection</p>
+            <button id="addFirstComicBtn" class="bg-gradient-to-r from-cyberblue to-cyberpurple text-white py-2 px-6 rounded-lg hover:opacity-90 transition">
+                <i class="fas fa-plus mr-2"></i> Add Comic
+            </button>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Comic Modal -->
+    <div id="comicModal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-overlay">
+        <div class="glass-effect modal-content rounded-lg w-full max-w-md mx-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyberblue/10 to-cyberpurple/10 opacity-30"></div>
+            <div class="relative z-10">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold cyber-font" id="modalTitle">Add New Comic</h3>
+                        <button id="closeModalBtn" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <!-- Cover Image Upload -->
+                        <div class="upload-area rounded-lg p-4 text-center cursor-pointer" id="uploadArea">
+                            <input type="file" id="coverUpload" accept="image/*" class="hidden">
+                            <div id="coverPreviewContainer" class="hidden mb-4">
+                                <img id="coverPreview" class="mx-auto max-h-40 rounded-lg" src="" alt="Cover Preview">
+                            </div>
+                            <div id="uploadInstructions" class="">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-cyberblue mb-2"></i>
+                                <p class="text-sm">Click to upload cover image</p>
+                                <p class="text-xs text-gray-400">JPEG, PNG (Max 2MB)</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Title -->
+                        <div>
+                            <label for="comicTitle" class="block text-sm font-medium mb-1">Title</label>
+                            <input type="text" id="comicTitle" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                        </div>
+                        
+                        <!-- Chapter -->
+                        <div>
+                            <label for="comicChapter" class="block text-sm font-medium mb-1">Chapter</label>
+                            <input type="text" id="comicChapter" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                        </div>
+                        
+                        <!-- Type -->
+                        <div>
+                            <label for="comicType" class="block text-sm font-medium mb-1">Type</label>
+                            <select id="comicType" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                                <option value="manga">Manga</option>
+                                <option value="manhwa">Manhwa</option>
+                                <option value="manhua">Manhua</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Rating -->
+                        <div>
+                            <label for="comicRating" class="block text-sm font-medium mb-1">Rating (0-10)</label>
+                            <input type="number" id="comicRating" min="0" max="10" step="0.1" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                        </div>
+                        
+                        <!-- Fansub -->
+                        <div>
+                            <label for="comicFansub" class="block text-sm font-medium mb-1">Fansub/Scanlation</label>
+                            <input type="text" id="comicFansub" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                        </div>
+                        
+                        <!-- Date Read -->
+                        <div>
+                            <label for="comicDate" class="block text-sm font-medium mb-1">Date Read</label>
+                            <input type="date" id="comicDate" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                        </div>
+                    </div>
+                    
+                    <div class="holographic-line my-6"></div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancelComicBtn" class="px-4 py-2 rounded-lg border border-gray-600 hover:border-cyberblue transition">
+                            Cancel
+                        </button>
+                        <button id="saveComicBtn" class="px-4 py-2 rounded-lg bg-cyberblue text-darkbg hover:bg-cyberpurple transition">
+                            Save Comic
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GitHub Settings Modal -->
+    <div id="githubModal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-overlay">
+        <div class="glass-effect modal-content rounded-lg w-full max-w-md mx-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyberblue/10 to-cyberpurple/10 opacity-30"></div>
+            <div class="relative z-10">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold cyber-font">GitHub Sync Settings</h3>
+                        <button id="closeGithubModalBtn" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <p class="text-sm">Connect to GitHub to sync your comic collection across devices. Data will be stored in a JSON file in your repository.</p>
+                        
+                        <div>
+                            <label for="githubToken" class="block text-sm font-medium mb-1">GitHub Personal Access Token</label>
+                            <input type="password" id="githubToken" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                            <p class="text-xs text-gray-400 mt-1">Create a token with repo permissions at GitHub</p>
+                        </div>
+                        
+                        <div>
+                            <label for="githubUsername" class="block text-sm font-medium mb-1">GitHub Username</label>
+                            <input type="text" id="githubUsername" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                        </div>
+                        
+                        <div>
+                            <label for="githubRepo" class="block text-sm font-medium mb-1">Repository Name</label>
+                            <input type="text" id="githubRepo" class="w-full bg-darkbg border border-cyberblue rounded-lg py-2 px-4 text-white focus:outline-none input-glow">
+                        </div>
+                        
+                        <div class="holographic-line my-4"></div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm" id="syncStatus">Not connected</p>
+                            </div>
+                            <button id="testConnectionBtn" class="px-4 py-2 rounded-lg border border-cyberblue text-cyberblue hover:bg-cyberblue hover:text-darkbg transition">
+                                Test Connection
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="holographic-line my-6"></div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancelGithubBtn" class="px-4 py-2 rounded-lg border border-gray-600 hover:border-cyberblue transition">
+                            Cancel
+                        </button>
+                        <button id="saveGithubBtn" class="px-4 py-2 rounded-lg bg-cyberblue text-darkbg hover:bg-cyberpurple transition">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-cyberblue border-t-cyberpurple rounded-full loading-spinner mx-auto mb-4"></div>
+            <p class="text-cyberblue cyber-font">Syncing with Nexus...</p>
+        </div>
+    </div>
+    
+    <!-- Settings Button -->
+    <div class="fixed bottom-6 right-6">
+        <button id="settingsBtn" class="w-12 h-12 rounded-full bg-gradient-to-br from-cyberblue to-cyberpurple flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+    
+    <script>
+        // Sample initial data
+        let comics = [
+            {
+                id: 1,
+                title: "Solo Leveling",
+                chapter: "Chapter 110",
+                type: "manhwa",
+                rating: 9.2,
+                fansub: "Asura Scans",
+                date: "2023-05-15",
+                cover: "https://i.imgur.com/8ZkYQ9W.jpg"
+            },
+            {
+                id: 2,
+                title: "One Piece",
+                chapter: "Chapter 1045",
+                type: "manga",
+                rating: 9.5,
+                fansub: "TCB Scans",
+                date: "2023-05-20",
+                cover: "https://i.imgur.com/JQ3q6Nx.jpg"
+            },
+            {
+                id: 3,
+                title: "Tower of God",
+                chapter: "Season 3 - Chapter 120",
+                type: "manhwa",
+                rating: 8.7,
+                fansub: "Webtoon",
+                date: "2023-05-10",
+                cover: "https://i.imgur.com/5vQZb9J.jpg"
+            },
+            {
+                id: 4,
+                title: "Berserk",
+                chapter: "Chapter 364",
+                type: "manga",
+                rating: 9.8,
+                fansub: "Dark Horse",
+                date: "2023-04-28",
+                cover: "https://i.imgur.com/3tQYV9T.jpg"
+            },
+            {
+                id: 5,
+                title: "Martial Peak",
+                chapter: "Chapter 2100",
+                type: "manhua",
+                rating: 7.5,
+                fansub: "ManhuaPlus",
+                date: "2023-05-18",
+                cover: "https://i.imgur.com/7G5kL9p.jpg"
+            },
+            {
+                id: 6,
+                title: "Jujutsu Kaisen",
+                chapter: "Chapter 188",
+                type: "manga",
+                rating: 8.9,
+                fansub: "Viz Media",
+                date: "2023-05-12",
+                cover: "https://i.imgur.com/9Xz8Q2a.jpg"
+            },
+            {
+                id: 7,
+                title: "The Beginning After The End",
+                chapter: "Chapter 150",
+                type: "manhwa",
+                rating: 8.8,
+                fansub: "Tapas",
+                date: "2023-05-05",
+                cover: "https://i.imgur.com/2KjY7fD.jpg"
+            },
+            {
+                id: 8,
+                title: "Apotheosis",
+                chapter: "Chapter 850",
+                type: "manhua",
+                rating: 7.2,
+                fansub: "MangaToon",
+                date: "2023-05-22",
+                cover: "https://i.imgur.com/4R8vW9c.jpg"
+            },
+            {
+                id: 9,
+                title: "Chainsaw Man",
+                chapter: "Chapter 97",
+                type: "manga",
+                rating: 9.1,
+                fansub: "MangaPlus",
+                date: "2023-05-14",
+                cover: "https://i.imgur.com/6XwZ4yQ.jpg"
+            }
+        ];
+        
+        // DOM Elements
+        const comicsGrid = document.getElementById('comicsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const sortSelect = document.getElementById('sortSelect');
+        const addComicBtn = document.getElementById('addComicBtn');
+        const addFirstComicBtn = document.getElementById('addFirstComicBtn');
+        const comicModal = document.getElementById('comicModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelComicBtn = document.getElementById('cancelComicBtn');
+        const saveComicBtn = document.getElementById('saveComicBtn');
+        const uploadArea = document.getElementById('uploadArea');
+        const coverUpload = document.getElementById('coverUpload');
+        const coverPreviewContainer = document.getElementById('coverPreviewContainer');
+        const coverPreview = document.getElementById('coverPreview');
+        const uploadInstructions = document.getElementById('uploadInstructions');
+        const comicTitle = document.getElementById('comicTitle');
+        const comicChapter = document.getElementById('comicChapter');
+        const comicType = document.getElementById('comicType');
+        const comicRating = document.getElementById('comicRating');
+        const comicFansub = document.getElementById('comicFansub');
+        const comicDate = document.getElementById('comicDate');
+        const githubModal = document.getElementById('githubModal');
+        const closeGithubModalBtn = document.getElementById('closeGithubModalBtn');
+        const cancelGithubBtn = document.getElementById('cancelGithubBtn');
+        const saveGithubBtn = document.getElementById('saveGithubBtn');
+        const githubToken = document.getElementById('githubToken');
+        const githubUsername = document.getElementById('githubUsername');
+        const githubRepo = document.getElementById('githubRepo');
+        const testConnectionBtn = document.getElementById('testConnectionBtn');
+        const syncStatus = document.getElementById('syncStatus');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        // State variables
+        let currentFilter = 'all';
+        let currentSort = 'date-desc';
+        let currentSearch = '';
+        let isEditing = false;
+        let currentComicId = null;
+        let githubSettings = {
+            token: '',
+            username: '',
+            repo: ''
+        };
+        
+        // Initialize the app
+        function init() {
+            renderComics();
+            loadGithubSettings();
+            setupEventListeners();
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Search
+            searchInput.addEventListener('input', (e) => {
+                currentSearch = e.target.value.toLowerCase();
+                renderComics();
+            });
+            
+            // Filter buttons
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active', 'bg-cyberblue', 'text-darkbg'));
+                    btn.classList.add('active', 'bg-cyberblue', 'text-darkbg');
+                    currentFilter = btn.dataset.filter;
+                    renderComics();
+                });
+            });
+            
+            // Sort select
+            sortSelect.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                renderComics();
+            });
+            
+            // Add comic buttons
+            addComicBtn.addEventListener('click', openAddComicModal);
+            addFirstComicBtn.addEventListener('click', openAddComicModal);
+            
+            // Modal buttons
+            closeModalBtn.addEventListener('click', closeComicModal);
+            cancelComicBtn.addEventListener('click', closeComicModal);
+            saveComicBtn.addEventListener('click', saveComic);
+            
+            // Cover upload
+            uploadArea.addEventListener('click', () => coverUpload.click());
+            coverUpload.addEventListener('change', handleCoverUpload);
+            
+            // GitHub settings
+            settingsBtn.addEventListener('click', openGithubModal);
+            closeGithubModalBtn.addEventListener('click', closeGithubModal);
+            cancelGithubBtn.addEventListener('click', closeGithubModal);
+            saveGithubBtn.addEventListener('click', saveGithubSettings);
+            testConnectionBtn.addEventListener('click', testGithubConnection);
+        }
+        
+        // Render comics based on current filters, search and sort
+        function renderComics() {
+            let filteredComics = [...comics];
+            
+            // Apply search filter
+            if (currentSearch) {
+                filteredComics = filteredComics.filter(comic => 
+                    comic.title.toLowerCase().includes(currentSearch) ||
+                    comic.fansub.toLowerCase().includes(currentSearch)
+                );
+            }
+            
+            // Apply type filter
+            if (currentFilter !== 'all') {
+                filteredComics = filteredComics.filter(comic => comic.type === currentFilter);
+            }
+            
+            // Apply sorting
+            filteredComics.sort((a, b) => {
+                switch (currentSort) {
+                    case 'date-desc':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'date-asc':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'title-asc':
+                        return a.title.localeCompare(b.title);
+                    case 'title-desc':
+                        return b.title.localeCompare(a.title);
+                    case 'rating-desc':
+                        return b.rating - a.rating;
+                    case 'rating-asc':
+                        return a.rating - b.rating;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Update UI
+            if (filteredComics.length === 0) {
+                comicsGrid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                comicsGrid.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+                
+                comicsGrid.innerHTML = '';
+                filteredComics.forEach(comic => {
+                    comicsGrid.appendChild(createComicCard(comic));
+                });
+            }
+        }
+        
+        // Create a comic card element
+        function createComicCard(comic) {
+            const card = document.createElement('div');
+            card.className = 'glass-effect card-hover rounded-lg overflow-hidden border border-transparent transition-all duration-300 relative';
+            card.dataset.id = comic.id;
+            
+            // Type indicator glow
+            let typeGlow = '';
+            if (comic.type === 'manga') typeGlow = 'shadow-[0_0_15px_rgba(0,240,255,0.3)]';
+            if (comic.type === 'manhwa') typeGlow = 'shadow-[0_0_15px_rgba(189,0,255,0.3)]';
+            if (comic.type === 'manhua') typeGlow = 'shadow-[0_0_15px_rgba(255,0,240,0.3)]';
+            
+            card.innerHTML = `
+                <div class="relative">
+                    <img src="${comic.cover}" alt="${comic.title}" class="w-full h-48 object-cover">
+                    <div class="absolute top-2 right-2">
+                        <span class="type-indicator ${comic.type} ${typeGlow}"></span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h3 class="font-bold text-white truncate">${comic.title}</h3>
+                                <p class="text-xs text-cyberblue">${comic.chapter}</p>
+                            </div>
+                            <div class="text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
+                                ${comic.rating.toFixed(1)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-gray-400">${comic.fansub}</span>
+                        <span class="text-xs text-gray-400">${formatDate(comic.date)}</span>
+                    </div>
+                    <div class="rating-bar rounded-full" style="width: ${comic.rating * 10}%"></div>
+                    <div class="flex justify-between mt-3">
+                        <button class="edit-btn text-xs text-cyberblue hover:text-cyberpurple transition" data-id="${comic.id}">
+                            <i class="fas fa-edit mr-1"></i> Edit
+                        </button>
+                        <button class="delete-btn text-xs text-red-400 hover:text-red-300 transition" data-id="${comic.id}">
+                            <i class="fas fa-trash-alt mr-1"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners to buttons
+            card.querySelector('.edit-btn').addEventListener('click', () => openEditComicModal(comic.id));
+            card.querySelector('.delete-btn').addEventListener('click', () => deleteComic(comic.id));
+            
+            return card;
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+        
+        // Open modal for adding a new comic
+        function openAddComicModal() {
+            isEditing = false;
+            currentComicId = null;
+            modalTitle.textContent = 'Add New Comic';
+            
+            // Reset form
+            comicTitle.value = '';
+            comicChapter.value = '';
+            comicType.value = 'manga';
+            comicRating.value = '';
+            comicFansub.value = '';
+            comicDate.value = '';
+            coverPreviewContainer.classList.add('hidden');
+            uploadInstructions.classList.remove('hidden');
+            coverPreview.src = '';
+            
+            comicModal.classList.remove('hidden');
+        }
+        
+        // Open modal for editing an existing comic
+        function openEditComicModal(id) {
+            isEditing = true;
+            currentComicId = id;
+            modalTitle.textContent = 'Edit Comic';
+            
+            const comic = comics.find(c => c.id === id);
+            
+            // Fill form
+            comicTitle.value = comic.title;
+            comicChapter.value = comic.chapter;
+            comicType.value = comic.type;
+            comicRating.value = comic.rating;
+            comicFansub.value = comic.fansub;
+            comicDate.value = comic.date;
+            
+            if (comic.cover) {
+                coverPreview.src = comic.cover;
+                coverPreviewContainer.classList.remove('hidden');
+                uploadInstructions.classList.add('hidden');
+            } else {
+                coverPreviewContainer.classList.add('hidden');
+                uploadInstructions.classList.remove('hidden');
+            }
+            
+            comicModal.classList.remove('hidden');
+        }
+        
+        // Close the comic modal
+        function closeComicModal() {
+            comicModal.classList.add('hidden');
+        }
+        
+        // Handle cover image upload
+        function handleCoverUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file (JPEG, PNG)');
+                return;
+            }
+            
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image size should be less than 2MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                coverPreview.src = event.target.result;
+                coverPreviewContainer.classList.remove('hidden');
+                uploadInstructions.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Save comic (add new or update existing)
+        function saveComic() {
+            // Validate form
+            if (!comicTitle.value || !comicChapter.value || !comicDate.value) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const rating = parseFloat(comicRating.value);
+            if (isNaN(rating) || rating < 0 || rating > 10) {
+                alert('Please enter a valid rating between 0 and 10');
+                return;
+            }
+            
+            const comicData = {
+                title: comicTitle.value,
+                chapter: comicChapter.value,
+                type: comicType.value,
+                rating: rating,
+                fansub: comicFansub.value,
+                date: comicDate.value,
+                cover: coverPreview.src || ''
+            };
+            
+            if (isEditing) {
+                // Update existing comic
+                const index = comics.findIndex(c => c.id === currentComicId);
+                if (index !== -1) {
+                    comics[index] = { ...comics[index], ...comicData };
+                }
+            } else {
+                // Add new comic
+                const newId = comics.length > 0 ? Math.max(...comics.map(c => c.id)) + 1 : 1;
+                comics.push({
+                    id: newId,
+                    ...comicData
+                });
+            }
+            
+            // Save to GitHub if configured
+            if (githubSettings.token && githubSettings.username && githubSettings.repo) {
+                saveToGitHub();
+            }
+            
+            renderComics();
+            closeComicModal();
+        }
+        
+        // Delete a comic
+        function deleteComic(id) {
+            if (confirm('Are you sure you want to delete this comic?')) {
+                comics = comics.filter(c => c.id !== id);
+                
+                // Save to GitHub if configured
+                if (githubSettings.token && githubSettings.username && githubSettings.repo) {
+                    saveToGitHub();
+                }
+                
+                renderComics();
+            }
+        }
+        
+        // GitHub settings functions
+        function openGithubModal() {
+            githubToken.value = githubSettings.token || '';
+            githubUsername.value = githubSettings.username || '';
+            githubRepo.value = githubSettings.repo || '';
+            syncStatus.textContent = githubSettings.token ? 'Connected' : 'Not connected';
+            githubModal.classList.remove('hidden');
+        }
+        
+        function closeGithubModal() {
+            githubModal.classList.add('hidden');
+        }
+        
+        function saveGithubSettings() {
+            githubSettings = {
+                token: githubToken.value,
+                username: githubUsername.value,
+                repo: githubRepo.value
+            };
+            
+            localStorage.setItem('githubSettings', JSON.stringify(githubSettings));
+            syncStatus.textContent = 'Connected';
+            
+            // Save current comics to GitHub
+            if (githubSettings.token && githubSettings.username && githubSettings.repo) {
+                saveToGitHub();
+            }
+            
+            closeGithubModal();
+        }
+        
+        function loadGithubSettings() {
+            const savedSettings = localStorage.getItem('githubSettings');
+            if (savedSettings) {
+                githubSettings = JSON.parse(savedSettings);
+            }
+        }
+        
+        function testGithubConnection() {
+            if (!githubToken.value || !githubUsername.value || !githubRepo.value) {
+                alert('Please fill in all GitHub settings');
+                return;
+            }
+            
+            loadingOverlay.classList.remove('hidden');
+            
+            // Simple test by trying to access the repo
+            fetch(`https://api.github.com/repos/${githubUsername.value}/${githubRepo.value}`, {
+                headers: {
+                    'Authorization': `token ${githubToken.value}`
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    syncStatus.textContent = 'Connection successful!';
+                    syncStatus.className = 'text-sm text-green-400';
+                } else {
+                    throw new Error('Connection failed');
+                }
+            })
+            .catch(error => {
+                syncStatus.textContent = 'Connection failed. Check your settings.';
+                syncStatus.className = 'text-sm text-red-400';
+                console.error('GitHub connection error:', error);
+            })
+            .finally(() => {
+                loadingOverlay.classList.add('hidden');
+            });
+        }
+        
+        // Save comics data to GitHub
+        function saveToGitHub() {
+            if (!githubSettings.token || !githubSettings.username || !githubSettings.repo) return;
+            
+            loadingOverlay.classList.remove('hidden');
+            
+            const url = `https://api.github.com/repos/${githubSettings.username}/${githubSettings.repo}/contents/bookmarks.json`;
+            const content = btoa(JSON.stringify(comics, null, 2));
+            
+            // First try to get the file to check if it exists
+            fetch(url, {
+                headers: {
+                    'Authorization': `token ${githubSettings.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json().then(data => {
+                        // File exists, update it
+                        return updateGitHubFile(data.sha, content);
+                    });
+                } else if (response.status === 404) {
+                    // File doesn't exist, create it
+                    return createGitHubFile(content);
+                } else {
+                    throw new Error('Failed to check file existence');
+                }
+            })
+            .then(() => {
+                console.log('Successfully saved to GitHub');
+            })
+            .catch(error => {
+                console.error('Error saving to GitHub:', error);
+                alert('Failed to save to GitHub. Check console for details.');
+            })
+            .finally(() => {
+                loadingOverlay.classList.add('hidden');
+            });
+        }
+        
+        function createGitHubFile(content) {
+            const url = `https://api.github.com/repos/${githubSettings.username}/${githubSettings.repo}/contents/bookmarks.json`;
+            
+            return fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${githubSettings.token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({
+                    message: 'Add comic bookmarks file',
+                    content: content
+                })
+            });
+        }
+        
+        function updateGitHubFile(sha, content) {
+            const url = `https://api.github.com/repos/${githubSettings.username}/${githubSettings.repo}/contents/bookmarks.json`;
+            
+            return fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${githubSettings.token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({
+                    message: 'Update comic bookmarks',
+                    content: content,
+                    sha: sha
+                })
+            });
+        }
+        
+        // Load comics from GitHub
+        function loadFromGitHub() {
+            if (!githubSettings.token || !githubSettings.username || !githubSettings.repo) return;
+            
+            loadingOverlay.classList.remove('hidden');
+            
+            const url = `https://api.github.com/repos/${githubSettings.username}/${githubSettings.repo}/contents/bookmarks.json`;
+            
+            fetch(url, {
+                headers: {
+                    'Authorization': `token ${githubSettings.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to load from GitHub');
+                }
+            })
+            .then(data => {
+                const content = atob(data.content);
+                comics = JSON.parse(content);
+                renderComics();
+            })
+            .catch(error => {
+                console.error('Error loading from GitHub:', error);
+            })
+            .finally(() => {
+                loadingOverlay.classList.add('hidden');
+            });
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            
+            // Load from GitHub if settings exist
+            if (githubSettings.token && githubSettings.username && githubSettings.repo) {
+                loadFromGitHub();
+            }
+        });
+    </script>
+</body>
+</html>
